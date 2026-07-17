@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Palabras">
+<title>Palabras</title>
+<style>
+  :root{
+    --bg1:#f8fafc; --bg2:#eef2ff;
+    --ink:#1e293b; --ink2:#64748b; --ink3:#94a3b8;
+    --line:#e2e8f0; --card:#ffffff;
+    --indigo:#4f46e5; --indigo-d:#4338ca;
+    --ok-bg:#ecfdf5; --ok-line:#6ee7b7; --ok-tx:#065f46;
+    --no-bg:#fff1f2; --no-line:#fda4af; --no-tx:#9f1239;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(to bottom,var(--bg1),var(--bg2));
+    background-attachment:fixed;
+    min-height:100vh; min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+    padding:calc(20px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:480px;margin:0 auto}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+
+  /* hlavička */
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:8px}
+  .dot{width:10px;height:10px;border-radius:99px;background:var(--indigo)}
+  .mark{font-family:Georgia,serif;font-weight:700;font-size:20px}
+  .seg{display:flex;background:#e2e8f0b3;border-radius:9px;padding:2px;font-size:12px;font-weight:600}
+  .segbtn{border:0;background:transparent;color:var(--ink2);padding:6px 11px;border-radius:7px;cursor:pointer}
+  .segbtn.on{background:#fff;color:var(--indigo-d);box-shadow:0 1px 2px #0000001a}
+
+  /* štatistiky */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 4px;text-align:center}
+  .stat b{display:block;font-size:18px;line-height:1;color:var(--ink)}
+  .stat span{display:block;font-size:11px;color:var(--ink3);margin-top:5px}
+  .stat i{display:block;font-style:normal;font-size:10px;color:#cbd5e1}
+
+  /* Leitnerove škatuľky */
+  .boxes{display:flex;gap:6px}
+  .box{flex:1;border-radius:9px;padding:8px 0;text-align:center}
+  .box b{font-size:14px;font-weight:700}
+  .lvl1{background:#e0e7ff;color:#312e81}
+  .lvl2{background:#c7d2fe;color:#312e81}
+  .lvl3{background:#a5b4fc;color:#1e1b4b}
+  .lvl4{background:#818cf8;color:#fff}
+  .lvl5{background:var(--indigo);color:#fff}
+  .boxcap{display:flex;justify-content:space-between;margin:6px 2px 22px;font-size:11px;color:var(--ink3)}
+
+  /* karta so slovom */
+  .card{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 12px 30px -12px #4f46e526;padding:30px 22px;text-align:center;margin-bottom:18px}
+  .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+  .prompt{font-family:Georgia,serif;font-weight:700;font-size:34px;line-height:1.15;word-break:break-word}
+
+  /* možnosti */
+  .opts{display:grid;gap:12px}
+  .opt{width:100%;text-align:center;padding:18px 14px;border:2px solid var(--line);border-radius:18px;background:#fff;color:var(--ink);font-size:18px;font-weight:500;cursor:pointer;transition:border-color .15s,background .15s}
+  .opt:hover{border-color:#a5b4fc}
+  .opt:active{background:#f8fafc}
+  .opt:disabled{cursor:default}
+  .opt.ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-tx)}
+  .opt.no{background:var(--no-bg);border-color:var(--no-line);color:var(--no-tx)}
+  .opt.dim{color:var(--ink3);border-color:var(--line)}
+  @media (prefers-reduced-motion:reduce){.opt{transition:none}}
+
+  .nudge{text-align:center;font-size:14px;color:var(--ink2);margin:16px 0 0}
+  .btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px}
+  .btn.dark{background:#1e293b;color:#fff}
+  .btn.dark:hover{background:#0f172a}
+  .btn.primary{background:var(--indigo);color:#fff}
+  .btn.primary:hover{background:var(--indigo-d)}
+  .btn.ghost{background:#fff;border:1px solid #cbd5e1;color:var(--ink)}
+
+  .foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px;font-size:14px}
+  .link{border:0;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--indigo);padding:0}
+  .link.muted{color:var(--ink3);font-weight:400}
+
+  /* panel tipov */
+  .tips{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;font-size:14px;line-height:1.55;color:var(--ink2)}
+  .tip{margin-bottom:16px}
+  .tip:last-child{margin-bottom:0}
+  .tip h4{margin:0 0 3px;font-size:14px;color:var(--ink)}
+
+  /* obrazovky */
+  .screen{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 12px 30px -12px #4f46e526;padding:34px 26px;text-align:center;margin-top:24px}
+  .big{font-family:Georgia,serif;font-weight:700;font-size:26px;margin:0 0 6px}
+  .emoji{font-size:48px;margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+  .cell{background:#f8fafc;border-radius:12px;padding:16px 4px}
+  .cell b{display:block;font-family:Georgia,serif;font-size:24px;color:var(--ink)}
+  .cell span{display:block;font-size:12px;color:var(--ink3);margin-top:4px}
+  .row{display:flex;gap:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ─── SLOVNÍK — tu pridávaj / uprav slová ───
+// cz = české slovo · es = španielsky preklad · cat = "slovo" | "fráza"
+const WORDS = [
+  {cz:"dům",es:"casa",cat:"slovo"},{cz:"voda",es:"agua",cat:"slovo"},
+  {cz:"chléb",es:"pan",cat:"slovo"},{cz:"pes",es:"perro",cat:"slovo"},
+  {cz:"kočka",es:"gato",cat:"slovo"},{cz:"kniha",es:"libro",cat:"slovo"},
+  {cz:"stůl",es:"mesa",cat:"slovo"},{cz:"židle",es:"silla",cat:"slovo"},
+  {cz:"okno",es:"ventana",cat:"slovo"},{cz:"dveře",es:"puerta",cat:"slovo"},
+  {cz:"ruka",es:"mano",cat:"slovo"},{cz:"hlava",es:"cabeza",cat:"slovo"},
+  {cz:"den",es:"día",cat:"slovo"},{cz:"noc",es:"noche",cat:"slovo"},
+  {cz:"jídlo",es:"comida",cat:"slovo"},{cz:"práce",es:"trabajo",cat:"slovo"},
+  {cz:"čas",es:"tiempo",cat:"slovo"},{cz:"rok",es:"año",cat:"slovo"},
+  {cz:"město",es:"ciudad",cat:"slovo"},{cz:"přítel",es:"amigo",cat:"slovo"},
+  {cz:"rodina",es:"familia",cat:"slovo"},{cz:"žena",es:"mujer",cat:"slovo"},
+  {cz:"muž",es:"hombre",cat:"slovo"},{cz:"auto",es:"coche",cat:"slovo"},
+  {cz:"peníze",es:"dinero",cat:"slovo"},{cz:"láska",es:"amor",cat:"slovo"},
+  {cz:"život",es:"vida",cat:"slovo"},{cz:"slunce",es:"sol",cat:"slovo"},
+  {cz:"strom",es:"árbol",cat:"slovo"},{cz:"květina",es:"flor",cat:"slovo"},
+  {cz:"mléko",es:"leche",cat:"slovo"},{cz:"káva",es:"café",cat:"slovo"},
+  {cz:"víno",es:"vino",cat:"slovo"},{cz:"pivo",es:"cerveza",cat:"slovo"},
+  {cz:"velký",es:"grande",cat:"slovo"},{cz:"malý",es:"pequeño",cat:"slovo"},
+  {cz:"dobrý",es:"bueno",cat:"slovo"},{cz:"nový",es:"nuevo",cat:"slovo"},
+  {cz:"starý",es:"viejo",cat:"slovo"},{cz:"jíst",es:"comer",cat:"slovo"},
+  {cz:"pít",es:"beber",cat:"slovo"},{cz:"spát",es:"dormir",cat:"slovo"},
+  {cz:"mluvit",es:"hablar",cat:"slovo"},
+  {cz:"dobrý den",es:"buenos días",cat:"fráza"},
+  {cz:"dobrý večer",es:"buenas noches",cat:"fráza"},
+  {cz:"děkuji",es:"gracias",cat:"fráza"},
+  {cz:"prosím",es:"por favor",cat:"fráza"},
+  {cz:"na shledanou",es:"adiós",cat:"fráza"},
+  {cz:"jak se máš?",es:"¿cómo estás?",cat:"fráza"},
+  {cz:"kolik to stojí?",es:"¿cuánto cuesta?",cat:"fráza"},
+  {cz:"nerozumím",es:"no entiendo",cat:"fráza"},
+  {cz:"kde je?",es:"¿dónde está?",cat:"fráza"},
+  {cz:"není zač",es:"de nada",cat:"fráza"},
+];
+
+const MAX_BOX = 5;
+const SAVE_KEY = "palabras-v1";
+
+// ── ukladanie do pamäte telefónu (bezpečné, ak nie je dostupné, appka aj tak beží) ──
+function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || null; }catch(e){ return null; } }
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({boxes:S.boxes,best:S.best,direction:S.direction})); }catch(e){} }
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function pickWord(boxes,exclude){
+  const pool = exclude ? WORDS.filter(w=>w.es!==exclude) : WORDS;
+  const weights = pool.map(w=>MAX_BOX+1-(boxes[w.es]||1)); // nižšia škatuľka = vyššia šanca
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<pool.length;i++){ r-=weights[i]; if(r<=0) return pool[i]; }
+  return pool[pool.length-1];
+}
+
+function makeQuestion(word,dir){
+  if(dir==="cz-es"){
+    const d = shuffle(WORDS.filter(w=>w.cat===word.cat&&w.es!==word.es)).slice(0,3).map(w=>w.es);
+    return {prompt:word.cz,label:"Prelož do španielčiny",correct:word.es,options:shuffle([word.es,...d])};
+  }
+  const d = shuffle(WORDS.filter(w=>w.cat===word.cat&&w.cz!==word.cz)).slice(0,3).map(w=>w.cz);
+  return {prompt:word.es,label:"Prelož do češtiny",correct:word.cz,options:shuffle([word.cz,...d])};
+}
+
+function newQuestion(dir,boxes,exclude){ const word=pickWord(boxes,exclude); return {word,question:makeQuestion(word,dir)}; }
+function mastered(){ return WORDS.filter(w=>(S.boxes[w.es]||1)===MAX_BOX).length; }
+
+// ── stav ──
+const saved = load();
+const S = {
+  boxes: (saved&&saved.boxes) ? saved.boxes : Object.fromEntries(WORDS.map(w=>[w.es,1])),
+  best: (saved&&saved.best) || 0,
+  direction: (saved&&saved.direction) || "cz-es",
+  answered:0, correct:0, streak:0,
+  selected:null, screen:"play", showTips:false, timer:null,
+  word:null, question:null,
+};
+(function seed(){ const q=newQuestion(S.direction,S.boxes,null); S.word=q.word; S.question=q.question; })();
+
+// ── akcie ──
+function choose(i){
+  if(S.selected!==null) return;
+  const opt = S.question.options[i];
+  S.selected = opt;
+  S.answered++;
+  const right = opt===S.question.correct;
+  if(right){ S.correct++; S.streak++; if(S.streak>S.best) S.best=S.streak; }
+  else S.streak=0;
+  const es=S.word.es, cur=S.boxes[es]||1;
+  S.boxes[es] = right ? Math.min(cur+1,MAX_BOX) : 1;
+  persist(); render();
+  if(right){ clearTimeout(S.timer); S.timer=setTimeout(next,700); } // správne → automaticky ďalej
+}
+function next(){
+  clearTimeout(S.timer);
+  if(mastered()===WORDS.length){ S.screen="won"; render(); return; }
+  S.selected=null;
+  const q=newQuestion(S.direction,S.boxes,S.word.es);
+  S.word=q.word; S.question=q.question;
+  render();
+}
+function switchDir(dir){ if(dir===S.direction) return; S.direction=dir; S.selected=null; clearTimeout(S.timer); const q=newQuestion(dir,S.boxes,null); S.word=q.word; S.question=q.question; persist(); render(); }
+function endSession(){ clearTimeout(S.timer); S.screen="end"; render(); }
+function resume(){ S.screen="play"; render(); }
+function reset(){
+  clearTimeout(S.timer);
+  S.boxes=Object.fromEntries(WORDS.map(w=>[w.es,1]));
+  S.best=0; S.answered=0; S.correct=0; S.streak=0; S.selected=null; S.screen="play";
+  const q=newQuestion(S.direction,S.boxes,null); S.word=q.word; S.question=q.question;
+  persist(); render();
+}
+function toggleTips(){ S.showTips=!S.showTips; render(); }
+
+// ── klávesnica (na počítači): 1–4 výber, Enter/šípka = ďalej ──
+document.addEventListener("keydown",e=>{
+  if(S.screen!=="play") return;
+  if(S.selected===null){
+    const n=parseInt(e.key,10);
+    if(n>=1&&n<=S.question.options.length) choose(n-1);
+  }else if(e.key==="Enter"||e.key===" "||e.key==="ArrowRight"){ e.preventDefault(); next(); }
+});
+
+// ── vykreslenie ──
+function render(){
+  const app=document.getElementById("app");
+  if(S.screen==="won"){ app.innerHTML = wonScreen(); return; }
+  if(S.screen==="end"){ app.innerHTML = endScreen(); return; }
+
+  const acc = S.answered ? Math.round(S.correct/S.answered*100) : 0;
+  const wrong = S.selected!==null && S.selected!==S.question.correct;
+
+  const boxesHtml = [1,2,3,4,5].map(lvl=>{
+    const c = WORDS.filter(w=>(S.boxes[w.es]||1)===lvl).length;
+    return `<div class="box lvl${lvl}"><b>${c}</b></div>`;
+  }).join("");
+
+  const optsHtml = S.question.options.map((o,i)=>{
+    let cls="";
+    if(S.selected!==null){
+      if(o===S.question.correct) cls="ok";
+      else if(o===S.selected) cls="no";
+      else cls="dim";
+    }
+    return `<button class="opt ${cls}" ${S.selected!==null?"disabled":""} onclick="choose(${i})">${o}</button>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div class="wrap">
+    <div class="head">
+      <div class="brand"><span class="dot"></span><span class="mark">Palabras</span></div>
+      <div class="seg">
+        <button class="segbtn ${S.direction==="cz-es"?"on":""}" onclick="switchDir('cz-es')">CZ → ES</button>
+        <button class="segbtn ${S.direction==="es-cz"?"on":""}" onclick="switchDir('es-cz')">ES → CZ</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>${S.answered}</b><span>Otázky</span></div>
+      <div class="stat"><b>${acc}%</b><span>Úspešnosť</span></div>
+      <div class="stat"><b>${S.streak}</b><span>Séria</span><i>${S.best?"rekord "+S.best:""}</i></div>
+    </div>
+
+    <div class="boxes">${boxesHtml}</div>
+    <div class="boxcap"><span>Nové</span><span>Zvládnuté</span></div>
+
+    <div class="card">
+      <div class="lbl">${S.question.label}</div>
+      <div class="prompt">${S.question.prompt}</div>
+    </div>
+
+    <div class="opts">${optsHtml}</div>
+
+    ${wrong ? `<p class="nudge">Skús si k tomuto slovu vymyslieť krátky živý obraz — lepšie sa uchytí.</p>
+      <button class="btn dark" onclick="next()">Ďalšie</button>` : ""}
+
+    <div class="foot">
+      <button class="link" onclick="toggleTips()">${S.showTips?"Skryť tipy ▴":"Ako sa učiť rýchlo ▾"}</button>
+      <button class="link muted" onclick="endSession()">Ukončiť reláciu</button>
+    </div>
+
+    ${S.showTips ? tipsHtml() : ""}
+  </div>`;
+}
+
+function tipsHtml(){
+  return `<div class="tips">
+    <div class="tip"><h4>Aktívne vybavovanie</h4>Skús si preklad vybaviť skôr, než pozrieš na možnosti — aj keď hádaš, to úsilie ukladá slovo hlbšie než opakované čítanie.</div>
+    <div class="tip"><h4>Rozložené opakovanie</h4>Slovo si zapamätáš nadlho, keď sa k nemu vraciaš v čase, nie keď ho dvadsaťkrát prečítaš naraz. Táto appka to robí za teba cez škatuľky hore.</div>
+    <div class="tip"><h4>Vlastný obraz</h4>Ku každému slovu si vytvor krátky živý obraz cez podobne znejúce slovo. „Caballo" (kôň) znie ako kavaléria na koňoch. Čím absurdnejší obraz, tým lepšie drží.</div>
+    <div class="tip"><h4>Nahlas a v kontexte</h4>Slovo vyslov nahlas a hneď ho vlož do krátkej vety. Pamäť viaže zvuk a použitie silnejšie než holé slovo.</div>
+    <div class="tip"><h4>Málo a často</h4>Desať minút denne poráža dve hodiny raz za týždeň. Krátke pravidelné dávky sú základ.</div>
+  </div>`;
+}
+
+function endScreen(){
+  const acc = S.answered ? Math.round(S.correct/S.answered*100) : 0;
+  return `<div class="wrap"><div class="screen">
+    <div class="big">Zhrnutie relácie</div>
+    <div class="grid2">
+      <div class="cell"><b>${S.answered}</b><span>Zodpovedané</span></div>
+      <div class="cell"><b>${acc}%</b><span>Úspešnosť</span></div>
+      <div class="cell"><b>${S.best}</b><span>Najdlhšia séria</span></div>
+      <div class="cell"><b>${mastered()}/${WORDS.length}</b><span>Zvládnuté slová</span></div>
+    </div>
+    <div class="row">
+      <button class="btn primary" onclick="resume()">Pokračovať</button>
+      <button class="btn ghost" onclick="reset()">Začať odznova</button>
+    </div>
+  </div></div>`;
+}
+
+function wonScreen(){
+  return `<div class="wrap"><div class="screen">
+    <div class="emoji">🎉</div>
+    <div class="big">¡Lo lograste!</div>
+    <p style="color:var(--ink2);margin:0 0 22px">Všetkých ${WORDS.length} slov si dostal do poslednej škatuľky.</p>
+    <button class="btn primary" onclick="reset()">Začať odznova</button>
+  </div></div>`;
+}
+
+// ── ikona + manifest (aby to po pridaní na plochu vyzeralo ako appka) ──
+(function pwa(){
+  const icon = 'data:image/svg+xml,'+encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" rx="112" fill="#4f46e5"/><text x="50%" y="53%" font-family="Georgia,serif" font-size="300" font-weight="bold" fill="#fff" text-anchor="middle" dominant-baseline="central">P</text></svg>');
+  const apple=document.createElement('link'); apple.rel='apple-touch-icon'; apple.href=icon; document.head.appendChild(apple);
+  const manifest={name:"Palabras",short_name:"Palabras",display:"standalone",background_color:"#f8fafc",theme_color:"#4f46e5",start_url:".",icons:[{src:icon,sizes:"512x512",type:"image/svg+xml",purpose:"any"}]};
+  const link=document.createElement('link'); link.rel='manifest';
+  try{ link.href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'})); document.head.appendChild(link); }catch(e){}
+})();
+
+render();
+</script>
+</body>
+</html>
